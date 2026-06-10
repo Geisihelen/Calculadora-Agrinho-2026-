@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Calculadora de Consumo de Água Rural — Concurso Agrinho 2026" />
+  <title>AquaAgro — Calculadora de Consumo de Água</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ======= HEADER ======= -->
+  <header class="header">
+    <div class="header__inner">
+      <div class="header__logo">
+        <span class="logo-icon" aria-hidden="true">💧</span>
+        <span class="logo-text">AquaAgro</span>
+      </div>
+      <button id="btn-dark-mode" class="btn-dark" aria-label="Alternar modo escuro" title="Modo escuro">
+        <span class="dark-icon" id="dark-icon">🌙</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ======= HERO ======= -->
+  <section class="hero" id="tela-home">
+    <div class="hero__content">
+      <div class="hero__badge">Concurso Agrinho 2026</div>
+      <h1 class="hero__title">
+        Quanto de água<br />
+        <span class="highlight">sua propriedade usa?</span>
+      </h1>
+      <p class="hero__desc">
+        Informe os dados da sua propriedade rural e descubra seu consumo de água
+        diário, seu potencial de economia e receba dicas personalizadas para
+        um campo mais sustentável.
+      </p>
+      <button class="btn-primary" id="btn-iniciar" aria-label="Iniciar calculadora">
+        Calcular meu consumo
+        <span class="btn-arrow" aria-hidden="true">→</span>
+      </button>
+    </div>
+    <div class="hero__visual" aria-hidden="true">
+      <div class="drop-anim">
+        <div class="drop drop--1"></div>
+        <div class="drop drop--2"></div>
+        <div class="drop drop--3"></div>
+        <div class="ripple"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======= CALCULADORA ======= -->
+  <section class="calc-section hidden" id="tela-calculadora">
+    <div class="container">
+      <h2 class="section-title">Dados da Propriedade</h2>
+      <p class="section-sub">Preencha os campos abaixo com os valores aproximados do seu uso diário.</p>
+
+      <!-- Barra de progresso -->
+      <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-fill" id="progress-fill"></div>
+        <span class="progress-label" id="progress-label">0% preenchido</span>
+      </div>
+
+      <!-- Formulário de entrada -->
+      <div class="form-grid" id="form-calculadora">
+
+        <!-- Bloco 1: Irrigação -->
+        <div class="form-card" data-group="irrigacao">
+          <div class="form-card__icon" aria-hidden="true">🌾</div>
+          <h3 class="form-card__title">Irrigação</h3>
+
+          <label class="field-label" for="area-irrigada">Área irrigada (hectares)</label>
+          <input class="field-input" type="number" id="area-irrigada" name="area-irrigada"
+            placeholder="Ex.: 5" min="0" max="10000" step="0.1" />
+
+          <label class="field-label" for="tipo-irrigacao">Tipo de irrigação</label>
+          <select class="field-select" id="tipo-irrigacao" name="tipo-irrigacao">
+            <option value="">Selecione...</option>
+            <option value="gotejamento">Gotejamento (2 L/m²/dia)</option>
+            <option value="aspersao">Aspersão (5 L/m²/dia)</option>
+            <option value="sulco">Sulco / Inundação (8 L/m²/dia)</option>
+            <option value="nenhum">Não irriga</option>
+          </select>
+        </div>
+
+        <!-- Bloco 2: Criação Animal -->
+        <div class="form-card" data-group="animais">
+          <div class="form-card__icon" aria-hidden="true">🐄</div>
+          <h3 class="form-card__title">Criação Animal</h3>
+
+          <label class="field-label" for="qtd-bovinos">Bovinos (cabeças)</label>
+          <input class="field-input" type="number" id="qtd-bovinos" name="qtd-bovinos"
+            placeholder="Ex.: 20" min="0" max="10000" />
+
+          <label class="field-label" for="qtd-suinos">Suínos (cabeças)</label>
+          <input class="field-input" type="number" id="qtd-suinos" name="qtd-suinos"
+            placeholder="Ex.: 10" min="0" max="10000" />
+
+          <label class="field-label" for="qtd-aves">Aves (cabeças)</label>
+          <input class="field-input" type="number" id="qtd-aves" name="qtd-aves"
+            placeholder="Ex.: 100" min="0" max="100000" />
+        </div>
+
+        <!-- Bloco 3: Uso Doméstico -->
+        <div class="form-card" data-group="domestico">
+          <div class="form-card__icon" aria-hidden="true">🏡</div>
+          <h3 class="form-card__title">Uso Doméstico</h3>
+
+          <label class="field-label" for="moradores">Pessoas na propriedade</label>
+          <input class="field-input" type="number" id="moradores" name="moradores"
+            placeholder="Ex.: 4" min="0" max="100" />
+
+          <label class="field-label" for="tipo-consumo">Padrão de consumo doméstico</label>
+          <select class="field-select" id="tipo-consumo" name="tipo-consumo">
+            <option value="">Selecione...</option>
+            <option value="baixo">Consciente (80 L/pessoa/dia)</option>
+            <option value="medio">Moderado (150 L/pessoa/dia)</option>
+            <option value="alto">Alto (220 L/pessoa/dia)</option>
+          </select>
+        </div>
+
+        <!-- Bloco 4: Práticas de Economia -->
+        <div class="form-card" data-group="praticas">
+          <div class="form-card__icon" aria-hidden="true">♻️</div>
+          <h3 class="form-card__title">Práticas de Economia</h3>
+          <p class="form-card__hint">Marque o que você já utiliza:</p>
+
+          <label class="checkbox-label">
+            <input type="checkbox" id="reuso-agua" name="reuso-agua" class="checkbox-input" />
+            <span class="checkbox-custom" aria-hidden="true"></span>
+            Reuso de água da chuva
+          </label>
+
+          <label class="checkbox-label">
+            <input type="checkbox" id="gotejamento-check" name="gotejamento-check" class="checkbox-input" />
+            <span class="checkbox-custom" aria-hidden="true"></span>
+            Gotejamento / irrigação precisa
+          </label>
+
+          <label class="checkbox-label">
+            <input type="checkbox" id="reuso-animal" name="reuso-animal" class="checkbox-input" />
+            <span class="checkbox-custom" aria-hidden="true"></span>
+            Reuso de água dos animais
+          </label>
+
+          <label class="checkbox-label">
+            <input type="checkbox" id="biodigestor" name="biodigestor" class="checkbox-input" />
+            <span class="checkbox-custom" aria-hidden="true"></span>
+            Biodigestor / tratamento de efluentes
+          </label>
+        </div>
+
+      </div><!-- /form-grid -->
+
+      <div class="form-actions">
+        <button class="btn-secondary" id="btn-limpar">Limpar campos</button>
+        <button class="btn-primary" id="btn-calcular">
+          Ver resultado
+          <span class="btn-arrow" aria-hidden="true">→</span>
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ======= RESULTADO ======= -->
+  <section class="result-section hidden" id="tela-resultado">
+    <div class="container">
+      <h2 class="section-title">Seu Resultado</h2>
+
+      <!-- Card principal de pontuação -->
+      <div class="result-hero">
+        <div class="result-gauge" id="result-gauge" aria-label="Indicador de consumo">
+          <svg class="gauge-svg" viewBox="0 0 160 100" aria-hidden="true">
+            <path class="gauge-track" d="M 10 90 A 70 70 0 0 1 150 90" />
+            <path class="gauge-fill" id="gauge-fill" d="M 10 90 A 70 70 0 0 1 150 90"
+              stroke-dasharray="0 220" />
+          </svg>
+          <div class="gauge-label">
+            <span class="gauge-value" id="gauge-value">0</span>
+            <span class="gauge-unit">L/dia</span>
+          </div>
+        </div>
+
+        <div class="result-classification" id="result-classification">
+          <div class="classification-badge" id="classification-badge">—</div>
+          <p class="classification-msg" id="classification-msg"></p>
+        </div>
+      </div>
+
+      <!-- Cards de detalhe -->
+      <div class="detail-grid">
+        <div class="detail-card detail-card--blue">
+          <div class="detail-card__icon" aria-hidden="true">🌾</div>
+          <div class="detail-card__label">Irrigação</div>
+          <div class="detail-card__value" id="val-irrigacao">0 L/dia</div>
+        </div>
+        <div class="detail-card detail-card--green">
+          <div class="detail-card__icon" aria-hidden="true">🐄</div>
+          <div class="detail-card__label">Animais</div>
+          <div class="detail-card__value" id="val-animais">0 L/dia</div>
+        </div>
+        <div class="detail-card detail-card--teal">
+          <div class="detail-card__icon" aria-hidden="true">🏡</div>
+          <div class="detail-card__label">Doméstico</div>
+          <div class="detail-card__value" id="val-domestico">0 L/dia</div>
+        </div>
+        <div class="detail-card detail-card--lime">
+          <div class="detail-card__icon" aria-hidden="true">💚</div>
+          <div class="detail-card__label">Economia estimada</div>
+          <div class="detail-card__value" id="val-economia">0 L/dia</div>
+        </div>
+      </div>
+
+      <!-- Sugestões -->
+      <div class="suggestions-box">
+        <h3 class="suggestions-title">Recomendações personalizadas</h3>
+        <ul class="suggestions-list" id="suggestions-list">
+          <!-- preenchido via JS -->
+        </ul>
+      </div>
+
+      <!-- Pontos fortes -->
+      <div class="strengths-box" id="strengths-box">
+        <h3 class="strengths-title">✅ O que você já faz bem</h3>
+        <ul class="strengths-list" id="strengths-list">
+          <!-- preenchido via JS -->
+        </ul>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-secondary" id="btn-refazer">Refazer cálculo</button>
+        <button class="btn-primary" id="btn-ver-dicas">Ver dicas de economia</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======= DICAS / EDUCAÇÃO ======= -->
+  <section class="tips-section hidden" id="tela-dicas">
+    <div class="container">
+      <h2 class="section-title">Como economizar água no campo</h2>
+      <p class="section-sub">Práticas simples que fazem grande diferença para o futuro do campo.</p>
+
+      <div class="tips-grid" id="tips-grid">
+        <!-- preenchido via JS -->
+      </div>
+
+      <div class="form-actions" style="">
+        <button class="btn-secondary" id="btn-voltar-resultado">← Voltar ao resultado</button>
+        <button class="btn-primary" id="btn-reiniciar">Novo cálculo 🔄</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======= FOOTER ======= -->
+  <footer class="footer">
+    <p>
+      <strong>AquaAgro</strong> — Concurso Agrinho 2026 · Subcategoria 3 · Ensino Médio
+    </p>
+    <p class="footer__sub">
+      Água é vida. No campo, é futuro. 🌱
+    </p>
+  </footer>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
