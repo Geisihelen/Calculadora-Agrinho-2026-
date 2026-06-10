@@ -1,1 +1,0 @@
-# Calculadora-Agrinho-2026-
