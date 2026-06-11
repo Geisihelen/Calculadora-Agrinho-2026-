@@ -3,266 +3,1505 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Calculadora de Consumo de Água Rural — Concurso Agrinho 2026" />
   <title>AquaAgro — Calculadora de Consumo de Água</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <style>
+/* =====================================================
+   VARIÁVEIS E RESET
+   ===================================================== */
+:root {
+  --bg:          #eef7f3;
+  --surface:     #ffffff;
+  --surface-2:   #e0f2ea;
+  --border:      #b8d8cb;
+
+  --primary:     #0f6b4f;
+  --primary-lt:  #1a9470;
+  --accent:      #00c4b0;
+  --accent-lt:   #b2ede9;
+  --accent-glow: rgba(0,196,176,.25);
+
+  --blue:        #1e6fbf;
+  --blue-lt:     #daeeff;
+  --lime:        #5aad2e;
+  --lime-lt:     #dff2cc;
+  --teal:        #0b8a7e;
+  --teal-lt:     #c5f0ec;
+
+  --text:        #122720;
+  --text-2:      #3d6358;
+  --text-3:      #7eaa96;
+
+  --danger:      #b92828;
+  --warn:        #d96a12;
+  --ok:          #1fa855;
+
+  --radius-sm:   8px;
+  --radius-md:   16px;
+  --radius-lg:   24px;
+  --radius-xl:   36px;
+  --radius-pill: 999px;
+
+  --shadow-sm:  0 2px 10px rgba(0,0,0,.06);
+  --shadow-md:  0 6px 24px rgba(0,0,0,.09);
+  --shadow-lg:  0 12px 40px rgba(0,0,0,.13);
+  --shadow-glow:0 0 32px rgba(0,196,176,.22);
+
+  --t: .28s ease;
+}
+
+[data-theme="dark"] {
+  --bg:        #091a12;
+  --surface:   #112219;
+  --surface-2: #182e22;
+  --border:    #214035;
+
+  --text:   #d8f0e5;
+  --text-2: #7fad94;
+  --text-3: #4a7d62;
+
+  --blue-lt:    #0f2840;
+  --lime-lt:    #142510;
+  --teal-lt:    #082620;
+  --accent-lt:  #082620;
+
+  --shadow-sm: 0 2px 10px rgba(0,0,0,.35);
+  --shadow-md: 0 6px 24px rgba(0,0,0,.45);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.65;
+  transition: background var(--t), color var(--t);
+  overflow-x: hidden;
+}
+ul { list-style: none; }
+button { cursor: pointer; border: none; background: none; font-family: inherit; }
+input, select { font-family: inherit; }
+
+/* =====================================================
+   UTILITÁRIOS
+   ===================================================== */
+.hidden { display: none !important; }
+.container { width: 100%; max-width: 1060px; margin: 0 auto; padding: 0 1.5rem; }
+
+/* =====================================================
+   CANVAS PARTÍCULAS (fundo animado global)
+   ===================================================== */
+#particles-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: .45;
+}
+
+/* =====================================================
+   HEADER
+   ===================================================== */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: rgba(255,255,255,.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: background var(--t);
+}
+[data-theme="dark"] .header {
+  background: rgba(9,26,18,.82);
+}
+.header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: .7rem 1.5rem;
+}
+.header__logo {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+}
+.logo-icon { font-size: 1.7rem; line-height: 1; }
+.logo-text {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--primary);
+  letter-spacing: -.03em;
+}
+.logo-tagline {
+  font-size: .68rem;
+  color: var(--text-3);
+  font-weight: 500;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  margin-left: .1rem;
+  align-self: flex-end;
+  margin-bottom: .12rem;
+  display: none;
+}
+@media (min-width: 500px) { .logo-tagline { display: block; } }
+
+.header__right { display: flex; align-items: center; gap: .6rem; }
+
+.btn-dark {
+  width: 40px; height: 40px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  transition: background var(--t), transform var(--t), box-shadow var(--t);
+}
+.btn-dark:hover {
+  background: var(--border);
+  transform: rotate(22deg);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+/* Breadcrumb nav */
+.nav-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .78rem;
+  color: var(--text-3);
+  font-weight: 600;
+}
+.nav-breadcrumb span { opacity: .5; }
+.nav-breadcrumb .crumb-active { color: var(--accent); }
+
+/* =====================================================
+   BOTÕES
+   ===================================================== */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  background: linear-gradient(135deg, var(--primary), var(--primary-lt));
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: .8rem 1.8rem;
+  border-radius: var(--radius-pill);
+  transition: transform var(--t), box-shadow var(--t), filter var(--t);
+  box-shadow: 0 4px 18px rgba(15,107,79,.38);
+  letter-spacing: .01em;
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0);
+  transition: background var(--t);
+}
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(15,107,79,.45);
+  filter: brightness(1.07);
+}
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:hover .btn-arrow { transform: translateX(5px); }
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  background: transparent;
+  color: var(--primary);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: .8rem 1.6rem;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--primary);
+  transition: background var(--t), color var(--t), transform var(--t);
+}
+.btn-secondary:hover {
+  background: var(--primary);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  background: transparent;
+  color: var(--text-2);
+  font-size: .9rem;
+  font-weight: 600;
+  padding: .6rem 1.2rem;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border);
+  transition: background var(--t), color var(--t), border-color var(--t);
+}
+.btn-ghost:hover {
+  background: var(--surface-2);
+  border-color: var(--accent);
+  color: var(--primary);
+}
+
+.btn-arrow { font-style: normal; transition: transform var(--t); }
+
+/* =====================================================
+   HOME / HERO
+   ===================================================== */
+.hero {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 3rem;
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 5.5rem 1.5rem 4rem;
+  min-height: calc(100vh - 60px);
+}
+
+.hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  background: var(--accent-lt);
+  color: var(--teal);
+  font-size: .74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  padding: .3rem .9rem;
+  border-radius: var(--radius-pill);
+  margin-bottom: 1.2rem;
+  border: 1px solid var(--accent);
+}
+.hero__badge-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse-dot 2s infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .5; transform: scale(1.4); }
+}
+
+.hero__title {
+  font-size: clamp(2.1rem, 5vw, 3.4rem);
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 1.2rem;
+  color: var(--text);
+  letter-spacing: -.03em;
+}
+.highlight {
+  color: var(--primary);
+  position: relative;
+  display: inline-block;
+}
+.highlight::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: -4px;
+  width: 100%; height: 5px;
+  background: linear-gradient(90deg, var(--accent), var(--primary-lt));
+  border-radius: 3px;
+}
+
+.hero__desc {
+  color: var(--text-2);
+  font-size: 1.07rem;
+  max-width: 460px;
+  margin-bottom: 2.2rem;
+  line-height: 1.7;
+}
+
+.hero__stats {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+.stat-pill {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: .55rem 1rem;
+  font-size: .82rem;
+  color: var(--text-2);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-weight: 600;
+}
+
+/* Animação da gota */
+.hero__visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.drop-scene {
+  position: relative;
+  width: 240px;
+  height: 320px;
+}
+.drop-circle-bg {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, var(--accent-lt) 0%, var(--surface-2) 70%, transparent 100%);
+  transform: scale(1.1);
+  animation: pulse-bg 4s ease-in-out infinite;
+}
+@keyframes pulse-bg {
+  0%, 100% { transform: scale(1.05); opacity: .7; }
+  50% { transform: scale(1.18); opacity: 1; }
+}
+.drop {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  animation: fall 2.4s ease-in infinite;
+  opacity: 0;
+  filter: blur(.3px);
+}
+.drop--1 { width: 20px; height: 28px; background: linear-gradient(160deg,#00e5d1,#00c4b0); top: 0; animation-delay: 0s; box-shadow: 0 0 10px rgba(0,196,176,.5); }
+.drop--2 { width: 14px; height: 20px; background: linear-gradient(160deg,#29a07c,#1a7a5e); top: 0; left: 55%; animation-delay: .85s; }
+.drop--3 { width: 11px; height: 16px; background: linear-gradient(160deg,#3ba0ef,#1e6fbf); top: 0; left: 38%; animation-delay: 1.55s; }
+@keyframes fall {
+  0%   { top: 20px; opacity: 0; }
+  12%  { opacity: 1; }
+  82%  { opacity: 1; }
+  100% { top: 240px; opacity: 0; }
+}
+.ripple {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px; height: 14px;
+  border-radius: 50%;
+  border: 2.5px solid var(--accent);
+  animation: ripple 2.4s ease-out infinite;
+  opacity: 0;
+}
+.ripple-2 {
+  border-color: var(--primary-lt);
+  animation-delay: .3s;
+}
+@keyframes ripple {
+  0%   { opacity: 0; width: 20px; }
+  30%  { opacity: .75; }
+  100% { opacity: 0; width: 130px; }
+}
+.hero-icon-float {
+  position: absolute;
+  font-size: 2.2rem;
+  animation: float 5s ease-in-out infinite;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,.12));
+}
+.hero-icon-float:nth-child(1) { top: 18%; right: 5%; animation-delay: 0s; }
+.hero-icon-float:nth-child(2) { top: 55%; right: -10%; animation-delay: 1.2s; font-size: 1.8rem; }
+.hero-icon-float:nth-child(3) { bottom: 15%; left: 0%; animation-delay: 2.3s; font-size: 1.6rem; }
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+/* Histórico da última análise */
+.last-result-banner {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius-md);
+  padding: .75rem 1.1rem;
+  font-size: .83rem;
+  color: var(--text-2);
+  margin-top: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  animation: slideIn .4s ease;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.last-result-banner .lrb-icon { font-size: 1.2rem; flex-shrink: 0; }
+.last-result-banner strong { color: var(--primary); }
+
+/* =====================================================
+   SEÇÃO CALCULADORA
+   ===================================================== */
+.calc-section {
+  position: relative;
+  z-index: 1;
+  padding: 3.5rem 0 5rem;
+}
+.section-header {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  margin-bottom: 2rem;
+}
+.section-eyebrow {
+  font-size: .72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+.section-eyebrow::before {
+  content: '';
+  display: block;
+  width: 20px; height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+.section-title {
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: -.02em;
+}
+.section-sub {
+  color: var(--text-2);
+  font-size: 1rem;
+}
+
+/* Barra de progresso */
+.progress-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: .9rem 1.2rem;
+  margin-bottom: 1.8rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+.progress-track {
+  flex: 1;
+  background: var(--surface-2);
+  border-radius: var(--radius-pill);
+  height: 8px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  width: 0%;
+  transition: width .5s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+.progress-label {
+  font-size: .78rem;
+  color: var(--text-3);
+  font-weight: 700;
+  white-space: nowrap;
+  min-width: 90px;
+  text-align: right;
+}
+
+/* Cards do formulário */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+.form-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.6rem;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--t), transform var(--t), border-color var(--t);
+  position: relative;
+  overflow: hidden;
+}
+.form-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .4s ease;
+}
+.form-card:hover { box-shadow: var(--shadow-md); transform: translateY(-4px); border-color: var(--accent); }
+.form-card:hover::before { transform: scaleX(1); }
+.form-card.has-data { border-color: var(--ok); }
+.form-card.has-data::before { transform: scaleX(1); background: linear-gradient(90deg,var(--ok),var(--accent)); }
+
+.form-card__icon-wrap {
+  width: 48px; height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem;
+  margin-bottom: .8rem;
+  border: 1px solid var(--border);
+}
+.form-card__title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 1rem;
+  letter-spacing: -.01em;
+}
+.form-card__hint {
+  font-size: .83rem;
+  color: var(--text-3);
+  margin-bottom: .75rem;
+}
+
+/* Inputs */
+.field-label {
+  display: block;
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--text-2);
+  margin-bottom: .3rem;
+  margin-top: .85rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.field-input,
+.field-select {
+  width: 100%;
+  padding: .6rem .95rem;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: .95rem;
+  transition: border-color var(--t), box-shadow var(--t), background var(--t);
+  -webkit-appearance: none; appearance: none;
+}
+.field-input:focus, .field-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3.5px rgba(0,196,176,.18);
+  background: var(--surface);
+}
+.field-input.filled, .field-select.filled {
+  border-color: var(--ok);
+  background: var(--lime-lt);
+}
+
+/* Checkboxes */
+.checkbox-label {
+  display: flex; align-items: center; gap: .65rem;
+  padding: .5rem .6rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer; font-size: .91rem;
+  transition: background var(--t);
+  margin-bottom: .25rem;
+}
+.checkbox-label:hover { background: var(--surface-2); }
+.checkbox-input { display: none; }
+.checkbox-custom {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--t), border-color var(--t), transform var(--t);
+}
+.checkbox-input:checked + .checkbox-custom {
+  background: var(--primary);
+  border-color: var(--primary);
+  transform: scale(1.1);
+}
+.checkbox-input:checked + .checkbox-custom::after {
+  content: '✓';
+  color: #fff;
+  font-size: .8rem;
+  font-weight: 800;
+}
+
+/* Ações */
+.form-actions {
+  display: flex; justify-content: flex-end;
+  gap: .75rem; flex-wrap: wrap; margin-top: 1.5rem;
+}
+
+/* =====================================================
+   RESULTADO
+   ===================================================== */
+.result-section { position: relative; z-index: 1; padding: 3.5rem 0 5rem; }
+
+.result-hero {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 2.2rem 2.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-lg);
+  flex-wrap: wrap;
+  position: relative;
+  overflow: hidden;
+}
+.result-hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary-lt));
+}
+
+/* Gauge */
+.result-gauge { position: relative; width: 190px; flex-shrink: 0; }
+.gauge-svg { width: 100%; height: auto; }
+.gauge-track { fill: none; stroke: var(--surface-2); stroke-width: 14; stroke-linecap: round; }
+.gauge-fill {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 14;
+  stroke-linecap: round;
+  transition: stroke-dasharray 1.4s cubic-bezier(.4,0,.2,1), stroke .5s ease;
+  filter: drop-shadow(0 0 6px var(--accent-glow));
+}
+.gauge-label {
+  position: absolute;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+.gauge-value {
+  display: block;
+  font-size: 1.55rem;
+  font-weight: 900;
+  color: var(--primary);
+  line-height: 1;
+  letter-spacing: -.03em;
+}
+.gauge-unit { font-size: .7rem; color: var(--text-3); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+
+/* Classificação */
+.result-classification { flex: 1; min-width: 200px; }
+.classification-badge {
+  display: inline-block;
+  font-size: 1rem;
+  font-weight: 800;
+  padding: .45rem 1.3rem;
+  border-radius: var(--radius-pill);
+  margin-bottom: .85rem;
+  border: 2px solid currentColor;
+  letter-spacing: -.01em;
+}
+.classification-badge.alto   { background: #fde8e8; color: var(--danger); }
+.classification-badge.medio  { background: #fef3e2; color: var(--warn);   }
+.classification-badge.bom    { background: var(--lime-lt); color: var(--lime); }
+.classification-badge.otimo  { background: var(--teal-lt); color: var(--teal); }
+.classification-msg { font-size: 1rem; color: var(--text-2); max-width: 460px; line-height: 1.65; }
+
+/* Cards de detalhe */
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.detail-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1.3rem;
+  display: flex; flex-direction: column; gap: .3rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--t), box-shadow var(--t);
+  cursor: default;
+}
+.detail-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.detail-card--blue  { border-top: 4px solid var(--blue);    background: var(--blue-lt); }
+.detail-card--green { border-top: 4px solid var(--lime);    background: var(--lime-lt); }
+.detail-card--teal  { border-top: 4px solid var(--teal);    background: var(--teal-lt); }
+.detail-card--lime  { border-top: 4px solid var(--accent);  background: var(--accent-lt); }
+.detail-card__icon  { font-size: 1.5rem; }
+.detail-card__label { font-size: .75rem; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; }
+.detail-card__value { font-size: 1.35rem; font-weight: 900; color: var(--text); letter-spacing: -.02em; }
+
+/* Sugestões / fortes */
+.suggestions-box, .strengths-box {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1.6rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+.suggestions-title, .strengths-title {
+  font-size: 1rem; font-weight: 800; color: var(--primary); margin-bottom: 1rem;
+  display: flex; align-items: center; gap: .5rem;
+}
+.suggestions-list li, .strengths-list li {
+  display: flex; align-items: flex-start; gap: .65rem;
+  padding: .6rem 0;
+  border-bottom: 1px solid var(--surface-2);
+  font-size: .91rem; color: var(--text-2);
+  transition: background var(--t);
+}
+.suggestions-list li:last-child, .strengths-list li:last-child { border-bottom: none; }
+.sug-icon { flex-shrink: 0; font-size: 1rem; margin-top: .12rem; }
+
+/* =====================================================
+   SEÇÃO DICAS
+   ===================================================== */
+.tips-section { position: relative; z-index: 1; padding: 3.5rem 0 5rem; }
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 1.25rem; margin-bottom: 2rem;
+}
+.tip-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--t), transform var(--t);
+}
+.tip-card:hover { box-shadow: var(--shadow-md); transform: translateY(-5px); }
+.tip-card__header {
+  padding: 1.3rem 1.3rem .75rem;
+  display: flex; align-items: center; gap: .75rem;
+  border-bottom: 1px solid var(--surface-2);
+}
+.tip-card__emoji { font-size: 2.1rem; flex-shrink: 0; }
+.tip-card__title { font-size: 1rem; font-weight: 800; color: var(--primary); letter-spacing: -.01em; }
+.tip-card__body { padding: .85rem 1.3rem 1.3rem; font-size: .89rem; color: var(--text-2); line-height: 1.65; }
+.tip-card__stat {
+  margin: .8rem 0 0;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  padding: .5rem .75rem;
+  font-size: .81rem; color: var(--primary); font-weight: 700;
+}
+
+/* =====================================================
+   FOOTER
+   ===================================================== */
+.footer {
+  position: relative; z-index: 1;
+  text-align: center;
+  padding: 2.2rem 1.5rem;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  font-size: .85rem;
+  color: var(--text-3);
+}
+.footer__sub { margin-top: .25rem; font-size: .8rem; }
+
+/* =====================================================
+   ANIMAÇÕES DE TELA
+   ===================================================== */
+.tela-fade {
+  animation: telaEntra .35s cubic-bezier(.4,0,.2,1) forwards;
+}
+@keyframes telaEntra {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =====================================================
+   RESPONSIVO
+   ===================================================== */
+@media (max-width: 720px) {
+  .hero { grid-template-columns: 1fr; padding: 3rem 1.25rem 3rem; min-height: auto; }
+  .hero__visual { display: none; }
+  .result-hero { flex-direction: column; align-items: flex-start; padding: 1.5rem; }
+  .form-actions { justify-content: stretch; }
+  .form-actions button { width: 100%; justify-content: center; }
+}
+@media (max-width: 480px) {
+  .detail-grid { grid-template-columns: 1fr 1fr; }
+  .hero__title { font-size: 1.85rem; }
+}
+
+/* ACESSIBILIDADE */
+*:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+</style>
 </head>
 <body>
 
-  <!-- ======= HEADER ======= -->
-  <header class="header">
-    <div class="header__inner">
-      <div class="header__logo">
-        <span class="logo-icon" aria-hidden="true">💧</span>
-        <span class="logo-text">AquaAgro</span>
-      </div>
-      <button id="btn-dark-mode" class="btn-dark" aria-label="Alternar modo escuro" title="Modo escuro">
-        <span class="dark-icon" id="dark-icon">🌙</span>
+<!-- Partículas de fundo -->
+<canvas id="particles-canvas"></canvas>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <span class="logo-icon">💧</span>
+      <span class="logo-text">AquaAgro</span>
+      <span class="logo-tagline">Agrinho 2026</span>
+    </div>
+    <div class="header__right">
+      <nav class="nav-breadcrumb" id="nav-breadcrumb" aria-label="Navegação">
+        <a href="#" class="btn-ghost" id="btn-nav-home" style="padding:.4rem .9rem;font-size:.78rem;display:none">🏠 Início</a>
+      </nav>
+      <button id="btn-dark-mode" class="btn-dark" aria-label="Alternar modo escuro">
+        <span id="dark-icon">🌙</span>
       </button>
     </div>
-  </header>
+  </div>
+</header>
 
-  <!-- ======= HERO ======= -->
-  <section class="hero" id="tela-home">
+<!-- ======= HOME ======= -->
+<section id="tela-home">
+  <div class="hero">
     <div class="hero__content">
-      <div class="hero__badge">Concurso Agrinho 2026</div>
+      <div class="hero__badge">
+        <span class="hero__badge-dot"></span>
+        Concurso Agrinho 2026
+      </div>
       <h1 class="hero__title">
         Quanto de água<br />
         <span class="highlight">sua propriedade usa?</span>
       </h1>
       <p class="hero__desc">
         Informe os dados da sua propriedade rural e descubra seu consumo de água
-        diário, seu potencial de economia e receba dicas personalizadas para
-        um campo mais sustentável.
+        diário, seu potencial de economia e receba dicas personalizadas para um
+        campo mais sustentável.
       </p>
-      <button class="btn-primary" id="btn-iniciar" aria-label="Iniciar calculadora">
+      <div class="hero__stats">
+        <div class="stat-pill">🌾 Irrigação</div>
+        <div class="stat-pill">🐄 Animais</div>
+        <div class="stat-pill">🏡 Doméstico</div>
+        <div class="stat-pill">♻️ Economia</div>
+      </div>
+      <button class="btn-primary" id="btn-iniciar">
         Calcular meu consumo
-        <span class="btn-arrow" aria-hidden="true">→</span>
+        <span class="btn-arrow">→</span>
       </button>
+      <div id="last-result-banner" class="last-result-banner hidden"></div>
     </div>
     <div class="hero__visual" aria-hidden="true">
-      <div class="drop-anim">
+      <div class="drop-scene">
+        <div class="drop-circle-bg"></div>
+        <span class="hero-icon-float">🌱</span>
+        <span class="hero-icon-float">☀️</span>
+        <span class="hero-icon-float">🐄</span>
         <div class="drop drop--1"></div>
         <div class="drop drop--2"></div>
         <div class="drop drop--3"></div>
         <div class="ripple"></div>
+        <div class="ripple ripple-2"></div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ======= CALCULADORA ======= -->
-  <section class="calc-section hidden" id="tela-calculadora">
-    <div class="container">
+<!-- ======= CALCULADORA ======= -->
+<section class="calc-section hidden" id="tela-calculadora">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-eyebrow">Passo 1 de 2</span>
       <h2 class="section-title">Dados da Propriedade</h2>
-      <p class="section-sub">Preencha os campos abaixo com os valores aproximados do seu uso diário.</p>
+      <p class="section-sub">Preencha os campos com os valores aproximados do seu uso diário.</p>
+    </div>
 
-      <!-- Barra de progresso -->
-      <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+    <div class="progress-wrap">
+      <div class="progress-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
         <div class="progress-fill" id="progress-fill"></div>
-        <span class="progress-label" id="progress-label">0% preenchido</span>
+      </div>
+      <span class="progress-label" id="progress-label">0% preenchido</span>
+    </div>
+
+    <div class="form-grid" id="form-calculadora">
+
+      <!-- Irrigação -->
+      <div class="form-card" data-group="irrigacao">
+        <div class="form-card__icon-wrap">🌾</div>
+        <h3 class="form-card__title">Irrigação</h3>
+        <label class="field-label" for="area-irrigada">Área irrigada (hectares)</label>
+        <input class="field-input" type="number" id="area-irrigada" placeholder="Ex.: 5" min="0" max="10000" step="0.1" />
+        <label class="field-label" for="tipo-irrigacao">Tipo de irrigação</label>
+        <select class="field-select" id="tipo-irrigacao">
+          <option value="">Selecione...</option>
+          <option value="gotejamento">Gotejamento (2 L/m²/dia)</option>
+          <option value="aspersao">Aspersão (5 L/m²/dia)</option>
+          <option value="sulco">Sulco / Inundação (8 L/m²/dia)</option>
+          <option value="nenhum">Não irriga</option>
+        </select>
       </div>
 
-      <!-- Formulário de entrada -->
-      <div class="form-grid" id="form-calculadora">
+      <!-- Animais -->
+      <div class="form-card" data-group="animais">
+        <div class="form-card__icon-wrap">🐄</div>
+        <h3 class="form-card__title">Criação Animal</h3>
+        <label class="field-label" for="qtd-bovinos">Bovinos (cabeças)</label>
+        <input class="field-input" type="number" id="qtd-bovinos" placeholder="Ex.: 20" min="0" max="10000" />
+        <label class="field-label" for="qtd-suinos">Suínos (cabeças)</label>
+        <input class="field-input" type="number" id="qtd-suinos" placeholder="Ex.: 10" min="0" max="10000" />
+        <label class="field-label" for="qtd-aves">Aves (cabeças)</label>
+        <input class="field-input" type="number" id="qtd-aves" placeholder="Ex.: 100" min="0" max="100000" />
+      </div>
 
-        <!-- Bloco 1: Irrigação -->
-        <div class="form-card" data-group="irrigacao">
-          <div class="form-card__icon" aria-hidden="true">🌾</div>
-          <h3 class="form-card__title">Irrigação</h3>
+      <!-- Doméstico -->
+      <div class="form-card" data-group="domestico">
+        <div class="form-card__icon-wrap">🏡</div>
+        <h3 class="form-card__title">Uso Doméstico</h3>
+        <label class="field-label" for="moradores">Pessoas na propriedade</label>
+        <input class="field-input" type="number" id="moradores" placeholder="Ex.: 4" min="0" max="100" />
+        <label class="field-label" for="tipo-consumo">Padrão de consumo</label>
+        <select class="field-select" id="tipo-consumo">
+          <option value="">Selecione...</option>
+          <option value="baixo">Consciente (80 L/pessoa/dia)</option>
+          <option value="medio">Moderado (150 L/pessoa/dia)</option>
+          <option value="alto">Alto (220 L/pessoa/dia)</option>
+        </select>
+      </div>
 
-          <label class="field-label" for="area-irrigada">Área irrigada (hectares)</label>
-          <input class="field-input" type="number" id="area-irrigada" name="area-irrigada"
-            placeholder="Ex.: 5" min="0" max="10000" step="0.1" />
-
-          <label class="field-label" for="tipo-irrigacao">Tipo de irrigação</label>
-          <select class="field-select" id="tipo-irrigacao" name="tipo-irrigacao">
-            <option value="">Selecione...</option>
-            <option value="gotejamento">Gotejamento (2 L/m²/dia)</option>
-            <option value="aspersao">Aspersão (5 L/m²/dia)</option>
-            <option value="sulco">Sulco / Inundação (8 L/m²/dia)</option>
-            <option value="nenhum">Não irriga</option>
-          </select>
-        </div>
-
-        <!-- Bloco 2: Criação Animal -->
-        <div class="form-card" data-group="animais">
-          <div class="form-card__icon" aria-hidden="true">🐄</div>
-          <h3 class="form-card__title">Criação Animal</h3>
-
-          <label class="field-label" for="qtd-bovinos">Bovinos (cabeças)</label>
-          <input class="field-input" type="number" id="qtd-bovinos" name="qtd-bovinos"
-            placeholder="Ex.: 20" min="0" max="10000" />
-
-          <label class="field-label" for="qtd-suinos">Suínos (cabeças)</label>
-          <input class="field-input" type="number" id="qtd-suinos" name="qtd-suinos"
-            placeholder="Ex.: 10" min="0" max="10000" />
-
-          <label class="field-label" for="qtd-aves">Aves (cabeças)</label>
-          <input class="field-input" type="number" id="qtd-aves" name="qtd-aves"
-            placeholder="Ex.: 100" min="0" max="100000" />
-        </div>
-
-        <!-- Bloco 3: Uso Doméstico -->
-        <div class="form-card" data-group="domestico">
-          <div class="form-card__icon" aria-hidden="true">🏡</div>
-          <h3 class="form-card__title">Uso Doméstico</h3>
-
-          <label class="field-label" for="moradores">Pessoas na propriedade</label>
-          <input class="field-input" type="number" id="moradores" name="moradores"
-            placeholder="Ex.: 4" min="0" max="100" />
-
-          <label class="field-label" for="tipo-consumo">Padrão de consumo doméstico</label>
-          <select class="field-select" id="tipo-consumo" name="tipo-consumo">
-            <option value="">Selecione...</option>
-            <option value="baixo">Consciente (80 L/pessoa/dia)</option>
-            <option value="medio">Moderado (150 L/pessoa/dia)</option>
-            <option value="alto">Alto (220 L/pessoa/dia)</option>
-          </select>
-        </div>
-
-        <!-- Bloco 4: Práticas de Economia -->
-        <div class="form-card" data-group="praticas">
-          <div class="form-card__icon" aria-hidden="true">♻️</div>
-          <h3 class="form-card__title">Práticas de Economia</h3>
-          <p class="form-card__hint">Marque o que você já utiliza:</p>
-
-          <label class="checkbox-label">
-            <input type="checkbox" id="reuso-agua" name="reuso-agua" class="checkbox-input" />
-            <span class="checkbox-custom" aria-hidden="true"></span>
-            Reuso de água da chuva
-          </label>
-
-          <label class="checkbox-label">
-            <input type="checkbox" id="gotejamento-check" name="gotejamento-check" class="checkbox-input" />
-            <span class="checkbox-custom" aria-hidden="true"></span>
-            Gotejamento / irrigação precisa
-          </label>
-
-          <label class="checkbox-label">
-            <input type="checkbox" id="reuso-animal" name="reuso-animal" class="checkbox-input" />
-            <span class="checkbox-custom" aria-hidden="true"></span>
-            Reuso de água dos animais
-          </label>
-
-          <label class="checkbox-label">
-            <input type="checkbox" id="biodigestor" name="biodigestor" class="checkbox-input" />
-            <span class="checkbox-custom" aria-hidden="true"></span>
-            Biodigestor / tratamento de efluentes
-          </label>
-        </div>
-
-      </div><!-- /form-grid -->
-
-      <div class="form-actions">
-        <button class="btn-secondary" id="btn-limpar">Limpar campos</button>
-        <button class="btn-primary" id="btn-calcular">
-          Ver resultado
-          <span class="btn-arrow" aria-hidden="true">→</span>
-        </button>
+      <!-- Práticas -->
+      <div class="form-card" data-group="praticas">
+        <div class="form-card__icon-wrap">♻️</div>
+        <h3 class="form-card__title">Práticas de Economia</h3>
+        <p class="form-card__hint">Marque o que você já utiliza:</p>
+        <label class="checkbox-label"><input type="checkbox" id="reuso-agua" class="checkbox-input" /><span class="checkbox-custom"></span>Reuso de água da chuva</label>
+        <label class="checkbox-label"><input type="checkbox" id="gotejamento-check" class="checkbox-input" /><span class="checkbox-custom"></span>Gotejamento / irrigação precisa</label>
+        <label class="checkbox-label"><input type="checkbox" id="reuso-animal" class="checkbox-input" /><span class="checkbox-custom"></span>Reuso de água dos animais</label>
+        <label class="checkbox-label"><input type="checkbox" id="biodigestor" class="checkbox-input" /><span class="checkbox-custom"></span>Biodigestor / tratamento de efluentes</label>
       </div>
 
     </div>
-  </section>
 
-  <!-- ======= RESULTADO ======= -->
-  <section class="result-section hidden" id="tela-resultado">
-    <div class="container">
+    <div class="form-actions">
+      <button class="btn-ghost" id="btn-limpar">🗑 Limpar campos</button>
+      <button class="btn-secondary" id="btn-voltar-home-calc">← Voltar ao início</button>
+      <button class="btn-primary" id="btn-calcular">Ver resultado <span class="btn-arrow">→</span></button>
+    </div>
+  </div>
+</section>
+
+<!-- ======= RESULTADO ======= -->
+<section class="result-section hidden" id="tela-resultado">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-eyebrow">Análise completa</span>
       <h2 class="section-title">Seu Resultado</h2>
+    </div>
 
-      <!-- Card principal de pontuação -->
-      <div class="result-hero">
-        <div class="result-gauge" id="result-gauge" aria-label="Indicador de consumo">
-          <svg class="gauge-svg" viewBox="0 0 160 100" aria-hidden="true">
-            <path class="gauge-track" d="M 10 90 A 70 70 0 0 1 150 90" />
-            <path class="gauge-fill" id="gauge-fill" d="M 10 90 A 70 70 0 0 1 150 90"
-              stroke-dasharray="0 220" />
-          </svg>
-          <div class="gauge-label">
-            <span class="gauge-value" id="gauge-value">0</span>
-            <span class="gauge-unit">L/dia</span>
-          </div>
-        </div>
-
-        <div class="result-classification" id="result-classification">
-          <div class="classification-badge" id="classification-badge">—</div>
-          <p class="classification-msg" id="classification-msg"></p>
+    <div class="result-hero">
+      <div class="result-gauge" id="result-gauge">
+        <svg class="gauge-svg" viewBox="0 0 160 100" aria-hidden="true">
+          <path class="gauge-track" d="M 10 90 A 70 70 0 0 1 150 90" />
+          <path class="gauge-fill" id="gauge-fill" d="M 10 90 A 70 70 0 0 1 150 90" stroke-dasharray="0 220" />
+        </svg>
+        <div class="gauge-label">
+          <span class="gauge-value" id="gauge-value">0</span>
+          <span class="gauge-unit">L/dia</span>
         </div>
       </div>
-
-      <!-- Cards de detalhe -->
-      <div class="detail-grid">
-        <div class="detail-card detail-card--blue">
-          <div class="detail-card__icon" aria-hidden="true">🌾</div>
-          <div class="detail-card__label">Irrigação</div>
-          <div class="detail-card__value" id="val-irrigacao">0 L/dia</div>
-        </div>
-        <div class="detail-card detail-card--green">
-          <div class="detail-card__icon" aria-hidden="true">🐄</div>
-          <div class="detail-card__label">Animais</div>
-          <div class="detail-card__value" id="val-animais">0 L/dia</div>
-        </div>
-        <div class="detail-card detail-card--teal">
-          <div class="detail-card__icon" aria-hidden="true">🏡</div>
-          <div class="detail-card__label">Doméstico</div>
-          <div class="detail-card__value" id="val-domestico">0 L/dia</div>
-        </div>
-        <div class="detail-card detail-card--lime">
-          <div class="detail-card__icon" aria-hidden="true">💚</div>
-          <div class="detail-card__label">Economia estimada</div>
-          <div class="detail-card__value" id="val-economia">0 L/dia</div>
-        </div>
-      </div>
-
-      <!-- Sugestões -->
-      <div class="suggestions-box">
-        <h3 class="suggestions-title">Recomendações personalizadas</h3>
-        <ul class="suggestions-list" id="suggestions-list">
-          <!-- preenchido via JS -->
-        </ul>
-      </div>
-
-      <!-- Pontos fortes -->
-      <div class="strengths-box" id="strengths-box">
-        <h3 class="strengths-title">✅ O que você já faz bem</h3>
-        <ul class="strengths-list" id="strengths-list">
-          <!-- preenchido via JS -->
-        </ul>
-      </div>
-
-      <div class="form-actions">
-        <button class="btn-secondary" id="btn-refazer">Refazer cálculo</button>
-        <button class="btn-primary" id="btn-ver-dicas">Ver dicas de economia</button>
+      <div class="result-classification" id="result-classification">
+        <div class="classification-badge" id="classification-badge">—</div>
+        <p class="classification-msg" id="classification-msg"></p>
       </div>
     </div>
-  </section>
 
-  <!-- ======= DICAS / EDUCAÇÃO ======= -->
-  <section class="tips-section hidden" id="tela-dicas">
-    <div class="container">
+    <div class="detail-grid">
+      <div class="detail-card detail-card--blue">
+        <div class="detail-card__icon">🌾</div>
+        <div class="detail-card__label">Irrigação</div>
+        <div class="detail-card__value" id="val-irrigacao">0 L/dia</div>
+      </div>
+      <div class="detail-card detail-card--green">
+        <div class="detail-card__icon">🐄</div>
+        <div class="detail-card__label">Animais</div>
+        <div class="detail-card__value" id="val-animais">0 L/dia</div>
+      </div>
+      <div class="detail-card detail-card--teal">
+        <div class="detail-card__icon">🏡</div>
+        <div class="detail-card__label">Doméstico</div>
+        <div class="detail-card__value" id="val-domestico">0 L/dia</div>
+      </div>
+      <div class="detail-card detail-card--lime">
+        <div class="detail-card__icon">💚</div>
+        <div class="detail-card__label">Economia estimada</div>
+        <div class="detail-card__value" id="val-economia">0 L/dia</div>
+      </div>
+    </div>
+
+    <div class="suggestions-box">
+      <h3 class="suggestions-title">💡 Recomendações personalizadas</h3>
+      <ul class="suggestions-list" id="suggestions-list"></ul>
+    </div>
+
+    <div class="strengths-box" id="strengths-box">
+      <h3 class="strengths-title">✅ O que você já faz bem</h3>
+      <ul class="strengths-list" id="strengths-list"></ul>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn-ghost" id="btn-voltar-home-result">🏠 Voltar ao início</button>
+      <button class="btn-secondary" id="btn-refazer">← Refazer cálculo</button>
+      <button class="btn-primary" id="btn-ver-dicas">Ver dicas de economia <span class="btn-arrow">→</span></button>
+    </div>
+  </div>
+</section>
+
+<!-- ======= DICAS ======= -->
+<section class="tips-section hidden" id="tela-dicas">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-eyebrow">Educação hídrica</span>
       <h2 class="section-title">Como economizar água no campo</h2>
       <p class="section-sub">Práticas simples que fazem grande diferença para o futuro do campo.</p>
-
-      <div class="tips-grid" id="tips-grid">
-        <!-- preenchido via JS -->
-      </div>
-
-      <div class="form-actions" style="">
-        <button class="btn-secondary" id="btn-voltar-resultado">← Voltar ao resultado</button>
-        <button class="btn-primary" id="btn-reiniciar">Novo cálculo 🔄</button>
-      </div>
     </div>
-  </section>
 
-  <!-- ======= FOOTER ======= -->
-  <footer class="footer">
-    <p>
-      <strong>AquaAgro</strong> — Concurso Agrinho 2026 · Subcategoria 3 · Ensino Médio
-    </p>
-    <p class="footer__sub">
-      Água é vida. No campo, é futuro. 🌱
-    </p>
-  </footer>
+    <div class="tips-grid" id="tips-grid"></div>
 
-  <script src="js/script.js"></script>
+    <div class="form-actions">
+      <button class="btn-ghost" id="btn-voltar-home-dicas">🏠 Voltar ao início</button>
+      <button class="btn-secondary" id="btn-voltar-resultado">← Voltar ao resultado</button>
+      <button class="btn-primary" id="btn-reiniciar">Novo cálculo 🔄</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p><strong>AquaAgro</strong> — Concurso Agrinho 2026 · Subcategoria 3 · Ensino Médio</p>
+  <p class="footer__sub">Água é vida. No campo, é futuro. 🌱</p>
+</footer>
+
+<script>
+'use strict';
+
+/* =====================================================
+   CONSTANTES
+   ===================================================== */
+const COEF_IRRIGACAO  = { gotejamento: 2, aspersao: 5, sulco: 8, nenhum: 0 };
+const COEF_ANIMAIS    = { bovino: 50, suino: 10, ave: 0.3 };
+const COEF_DOMESTICO  = { baixo: 80, medio: 150, alto: 220 };
+const DESC_PRATICAS   = { 'reuso-agua': .08, 'gotejamento-check': .10, 'reuso-animal': .05, 'biodigestor': .06 };
+
+const DICAS = [
+  { emoji:'💧', titulo:'Irrigação por gotejamento', texto:'O gotejamento entrega água diretamente à raiz, reduzindo o desperdício em até 50% comparado à aspersão e 75% em relação ao sulco. Ideal para hortaliças, frutas e café.', stat:'💡 Economia: até 50% de água na lavoura' },
+  { emoji:'🌧️', titulo:'Captação de água da chuva', texto:'Cisternas e barragens de contenção captam a água das chuvas e a armazenam para períodos de seca. No Paraná, a média pluviométrica é de 1.400 mm/ano — potencial enorme.', stat:'💡 Uma cisterna de 15.000 L supre uma família por meses' },
+  { emoji:'🐄', titulo:'Reuso da água animal', texto:'A água usada na limpeza de cochos e instalações pode ser tratada e reutilizada para irrigação de pastagens. Biodigestores transformam efluentes em biogás e biofertilizante.', stat:'💡 Reduz até 30% o consumo em confinamentos' },
+  { emoji:'🌱', titulo:'Cobertura do solo', texto:'Manter o solo coberto com palha ou plantio direto reduz a evaporação em até 40%, diminuindo a necessidade de irrigação e protegendo a microbiota do solo.', stat:'💡 Temperatura do solo 5°C menor com cobertura' },
+  { emoji:'📊', titulo:'Monitoramento e sensores', texto:'Sensores de umidade do solo (tensiômetros) indicam o momento exato de irrigar, evitando excesso e déficit hídrico. Tecnologia acessível a produtores de todos os portes.', stat:'💡 Redução de 20 a 40% no volume de irrigação' },
+  { emoji:'🌲', titulo:'Preservação de matas ciliares', texto:'As matas ao redor de rios e nascentes retêm umidade, evitam erosão e garantem a qualidade da água. O Código Florestal exige sua preservação — e a natureza agradece.', stat:'💡 1 ha de mata ciliar filtra até 300 ton de sedimentos/ano' }
+];
+
+const SUGESTOES = {
+  irrigacaoAlta: { icon:'🌾', texto:'Sua irrigação consome muito. Considere migrar para gotejamento ou aspersão de baixo volume para economizar até 60% de água.' },
+  semReuso:      { icon:'💧', texto:'Você ainda não reutiliza água da chuva. Uma cisterna simples pode economizar milhares de litros por ano e garantir água na seca.' },
+  semGotejamento:{ icon:'🚿', texto:'Implementar gotejamento ou micro-aspersão pode reduzir o consumo hídrico da lavoura em até 50%.' },
+  animaisAlto:   { icon:'🐄', texto:'O consumo dos animais é elevado. Reutilize água de limpeza de instalações e instale bebedouros com boia para evitar desperdício.' },
+  domAlto:       { icon:'🏡', texto:'O consumo doméstico está acima da média. Consertos de vazamentos e redutores de fluxo podem economizar até 30% da água doméstica.' },
+  semBiodigestor:{ icon:'♻️', texto:'Um biodigestor transforma os efluentes dos animais em biogás (energia) e biofertilizante líquido, além de tratar a água residual.' }
+};
+
+/* =====================================================
+   REFERÊNCIAS DOM
+   ===================================================== */
+const telaHome    = document.getElementById('tela-home');
+const telaCalc    = document.getElementById('tela-calculadora');
+const telaResult  = document.getElementById('tela-resultado');
+const telaDicas   = document.getElementById('tela-dicas');
+
+const btnIniciar        = document.getElementById('btn-iniciar');
+const btnCalcular       = document.getElementById('btn-calcular');
+const btnLimpar         = document.getElementById('btn-limpar');
+const btnRefazer        = document.getElementById('btn-refazer');
+const btnVerDicas       = document.getElementById('btn-ver-dicas');
+const btnVoltarResult   = document.getElementById('btn-voltar-resultado');
+const btnReiniciar      = document.getElementById('btn-reiniciar');
+const btnNavHome        = document.getElementById('btn-nav-home');
+const btnVoltarHomeCalc  = document.getElementById('btn-voltar-home-calc');
+const btnVoltarHomeResult= document.getElementById('btn-voltar-home-result');
+const btnVoltarHomeDicas = document.getElementById('btn-voltar-home-dicas');
+
+const btnDark    = document.getElementById('btn-dark-mode');
+const darkIcon   = document.getElementById('dark-icon');
+const progressFill  = document.getElementById('progress-fill');
+const progressLabel = document.getElementById('progress-label');
+
+const inputArea       = document.getElementById('area-irrigada');
+const selectIrrigacao = document.getElementById('tipo-irrigacao');
+const inputBovinos    = document.getElementById('qtd-bovinos');
+const inputSuinos     = document.getElementById('qtd-suinos');
+const inputAves       = document.getElementById('qtd-aves');
+const inputMoradores  = document.getElementById('moradores');
+const selectConsumo   = document.getElementById('tipo-consumo');
+const checkReusoAgua  = document.getElementById('reuso-agua');
+const checkGotejamento= document.getElementById('gotejamento-check');
+const checkReusoAnimal= document.getElementById('reuso-animal');
+const checkBiodigestor= document.getElementById('biodigestor');
+
+const gaugeValue      = document.getElementById('gauge-value');
+const gaugeFill       = document.getElementById('gauge-fill');
+const classBadge      = document.getElementById('classification-badge');
+const classMsg        = document.getElementById('classification-msg');
+const valIrrigacao    = document.getElementById('val-irrigacao');
+const valAnimais      = document.getElementById('val-animais');
+const valDomestico    = document.getElementById('val-domestico');
+const valEconomia     = document.getElementById('val-economia');
+const suggestionsList = document.getElementById('suggestions-list');
+const strengthsList   = document.getElementById('strengths-list');
+const tipsGrid        = document.getElementById('tips-grid');
+
+/* =====================================================
+   PARTÍCULAS DE FUNDO
+   ===================================================== */
+(function initParticles() {
+  const canvas = document.getElementById('particles-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function rand(min, max) { return min + Math.random() * (max - min); }
+
+  for (let i = 0; i < 28; i++) {
+    particles.push({
+      x: rand(0, window.innerWidth),
+      y: rand(0, window.innerHeight),
+      r: rand(2, 7),
+      vx: rand(-.15, .15),
+      vy: rand(-.25, -.05),
+      alpha: rand(.15, .45),
+      color: Math.random() > .5 ? '#00c4b0' : '#1a9470'
+    });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.alpha;
+      ctx.fill();
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.y < -10) { p.y = H + 10; p.x = rand(0, W); }
+      if (p.x < -10) p.x = W + 10;
+      if (p.x > W + 10) p.x = -10;
+    });
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* =====================================================
+   NAVEGAÇÃO
+   ===================================================== */
+function mostrarTela(telaAlvo) {
+  [telaHome, telaCalc, telaResult, telaDicas].forEach(t => {
+    t.classList.add('hidden');
+    t.classList.remove('tela-fade');
+  });
+  telaAlvo.classList.remove('hidden');
+  requestAnimationFrame(() => telaAlvo.classList.add('tela-fade'));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Botão "Início" no header — só aparece fora da home
+  btnNavHome.style.display = telaAlvo === telaHome ? 'none' : 'inline-flex';
+}
+
+btnIniciar.addEventListener('click', () => { mostrarTela(telaCalc); atualizarProgresso(); });
+btnRefazer.addEventListener('click', () => mostrarTela(telaCalc));
+btnVerDicas.addEventListener('click', () => { renderizarDicas(); mostrarTela(telaDicas); });
+btnVoltarResult.addEventListener('click', () => mostrarTela(telaResult));
+btnReiniciar.addEventListener('click', () => { limparFormulario(); mostrarTela(telaHome); });
+
+// Voltar para a home
+function voltarHome() { limparFormulario(); mostrarTela(telaHome); }
+btnNavHome.addEventListener('click', voltarHome);
+btnVoltarHomeCalc.addEventListener('click', voltarHome);
+btnVoltarHomeResult.addEventListener('click', voltarHome);
+btnVoltarHomeDicas.addEventListener('click', voltarHome);
+
+/* =====================================================
+   DARK MODE
+   ===================================================== */
+function aplicarTema(tema) {
+  document.documentElement.setAttribute('data-theme', tema);
+  darkIcon.textContent = tema === 'dark' ? '☀️' : '🌙';
+  localStorage.setItem('aquaagro-tema', tema);
+}
+(function() {
+  const s = localStorage.getItem('aquaagro-tema');
+  if (s) aplicarTema(s);
+  else if (window.matchMedia('(prefers-color-scheme: dark)').matches) aplicarTema('dark');
+})();
+btnDark.addEventListener('click', () => {
+  aplicarTema(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+});
+
+/* =====================================================
+   PROGRESSO
+   ===================================================== */
+const camposRastreados = [inputArea, selectIrrigacao, inputBovinos, inputSuinos, inputAves, inputMoradores, selectConsumo];
+
+function atualizarProgresso() {
+  const n = camposRastreados.filter(c => c.value !== '' && c.value !== '0').length;
+  const pct = Math.round(n / camposRastreados.length * 100);
+  progressFill.style.width = pct + '%';
+  progressFill.closest('[role="progressbar"]') && progressFill.parentElement.setAttribute('aria-valuenow', pct);
+  progressLabel.textContent = pct + '% preenchido';
+
+  // Destaque do card quando tem dados
+  document.querySelectorAll('.form-card').forEach(card => {
+    const grupo = card.dataset.group;
+    let temDado = false;
+    if (grupo === 'irrigacao') temDado = inputArea.value && selectIrrigacao.value;
+    if (grupo === 'animais')  temDado = inputBovinos.value || inputSuinos.value || inputAves.value;
+    if (grupo === 'domestico') temDado = inputMoradores.value && selectConsumo.value;
+    if (grupo === 'praticas') temDado = checkReusoAgua.checked || checkGotejamento.checked || checkReusoAnimal.checked || checkBiodigestor.checked;
+    card.classList.toggle('has-data', !!temDado);
+  });
+}
+
+camposRastreados.forEach(c => { c.addEventListener('input', atualizarProgresso); c.addEventListener('change', atualizarProgresso); });
+[checkReusoAgua, checkGotejamento, checkReusoAnimal, checkBiodigestor].forEach(c => c.addEventListener('change', atualizarProgresso));
+
+/* Feedback 'filled' */
+document.querySelectorAll('.field-input, .field-select').forEach(c => {
+  const upd = () => c.classList.toggle('filled', c.value.trim() !== '' && c.value !== '0');
+  c.addEventListener('input', upd);
+  c.addEventListener('change', upd);
+});
+
+/* =====================================================
+   CÁLCULO
+   ===================================================== */
+function calcularConsumo() {
+  const area    = parseFloat(inputArea.value) || 0;
+  const coefIrr = COEF_IRRIGACAO[selectIrrigacao.value] || 0;
+  const litrosIrrig = area * 10000 * coefIrr;
+
+  const bovinos = parseInt(inputBovinos.value) || 0;
+  const suinos  = parseInt(inputSuinos.value) || 0;
+  const aves    = parseInt(inputAves.value) || 0;
+  const litrosAnim = bovinos * COEF_ANIMAIS.bovino + suinos * COEF_ANIMAIS.suino + aves * COEF_ANIMAIS.ave;
+
+  const moradores = parseInt(inputMoradores.value) || 0;
+  const coefDom   = COEF_DOMESTICO[selectConsumo.value] || 0;
+  const litrosDom = moradores * coefDom;
+
+  const bruto = litrosIrrig + litrosAnim + litrosDom;
+
+  let perc = 0;
+  if (checkReusoAgua.checked)   perc += DESC_PRATICAS['reuso-agua'];
+  if (checkGotejamento.checked) perc += DESC_PRATICAS['gotejamento-check'];
+  if (checkReusoAnimal.checked) perc += DESC_PRATICAS['reuso-animal'];
+  if (checkBiodigestor.checked) perc += DESC_PRATICAS['biodigestor'];
+  perc = Math.min(perc, .35);
+
+  const economia = Math.round(bruto * perc);
+  return {
+    irrigacao: Math.round(litrosIrrig),
+    animais:   Math.round(litrosAnim),
+    domestico: Math.round(litrosDom),
+    economia,
+    bruto:     Math.round(bruto),
+    total:     Math.round(bruto - economia)
+  };
+}
+
+function classificar(total) {
+  if (total === 0) return { classeCSS:'otimo', rotulo:'✅ Sem dados suficientes', mensagem:'Preencha os campos para obter sua classificação.' };
+  if (total <= 5000)  return { classeCSS:'otimo', rotulo:'🏆 Consumo Exemplar', mensagem:'Parabéns! Sua propriedade usa água com muita eficiência. Continue assim e inspire seus vizinhos!' };
+  if (total <= 20000) return { classeCSS:'bom',   rotulo:'🌿 Consumo Eficiente', mensagem:'Bom trabalho! O consumo está dentro de uma faixa razoável. Algumas práticas simples podem reduzir ainda mais.' };
+  if (total <= 80000) return { classeCSS:'medio',  rotulo:'⚠️ Consumo Moderado', mensagem:'Há espaço para melhorias. Adotar irrigação mais eficiente e práticas de reuso pode reduzir significativamente.' };
+  return { classeCSS:'alto', rotulo:'🔴 Consumo Elevado', mensagem:'O consumo está acima do ideal. Revise seus sistemas de irrigação e considere práticas de economia hídrica urgentemente.' };
+}
+
+function gerarSugestoes(dados) {
+  const sugs = [];
+  if (dados.irrigacao > 20000 && selectIrrigacao.value !== 'gotejamento') sugs.push(SUGESTOES.irrigacaoAlta);
+  if (!checkReusoAgua.checked) sugs.push(SUGESTOES.semReuso);
+  if (!checkGotejamento.checked && dados.irrigacao > 5000) sugs.push(SUGESTOES.semGotejamento);
+  if (dados.animais > 10000) sugs.push(SUGESTOES.animaisAlto);
+  if (selectConsumo.value === 'alto') sugs.push(SUGESTOES.domAlto);
+  if (!checkBiodigestor.checked && (parseInt(inputBovinos.value) || 0) > 10) sugs.push(SUGESTOES.semBiodigestor);
+  if (sugs.length === 0) {
+    sugs.push({ icon:'⭐', texto:'Excelente! Sua propriedade já adota boas práticas de uso hídrico. Compartilhe seu conhecimento!' });
+    sugs.push({ icon:'📢', texto:'Considere participar de programas de certificação em sustentabilidade, como o Produtor de Água (ANA) ou Senar Verde.' });
+  }
+  return sugs;
+}
+
+function gerarPontosFortes() {
+  const f = [];
+  if (checkReusoAgua.checked)   f.push('Você reutiliza água da chuva — prática essencial na agricultura sustentável.');
+  if (checkGotejamento.checked) f.push('Gotejamento ou irrigação precisa: você economiza água com tecnologia.');
+  if (checkReusoAnimal.checked) f.push('Reuso de água animal: fechando o ciclo hídrico na propriedade.');
+  if (checkBiodigestor.checked) f.push('Biodigestor: tratamento de efluentes e geração de energia e adubo.');
+  if (selectIrrigacao.value === 'gotejamento') f.push('Sistema de gotejamento: o mais eficiente dos sistemas de irrigação.');
+  if (selectConsumo.value === 'baixo') f.push('Consumo doméstico consciente: hábito que faz diferença no total.');
+  return f;
+}
+
+function animarGauge(total, classeCSS) {
+  const pct = Math.min(total / 100000, 1);
+  const arc = Math.round(pct * 220);
+  gaugeFill.style.strokeDasharray = `${arc} 220`;
+  const cores = { otimo:'#0f6b4f', bom:'#5aad2e', medio:'#d96a12', alto:'#b92828' };
+  gaugeFill.style.stroke = cores[classeCSS] || '#0f6b4f';
+}
+
+/* Animação numérica do gauge */
+function animarNumero(el, alvo, duracao = 1200) {
+  const inicio = performance.now();
+  function tick(agora) {
+    const p = Math.min((agora - inicio) / duracao, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = formatarNumero(Math.round(alvo * ease));
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+function mostrarResultado() {
+  const dados   = calcularConsumo();
+  const classif = classificar(dados.total);
+
+  animarNumero(gaugeValue, dados.total);
+  animarGauge(dados.total, classif.classeCSS);
+
+  classBadge.textContent = classif.rotulo;
+  classBadge.className   = 'classification-badge ' + classif.classeCSS;
+  classMsg.textContent   = classif.mensagem;
+
+  valIrrigacao.textContent = formatarNumero(dados.irrigacao) + ' L/dia';
+  valAnimais.textContent   = formatarNumero(dados.animais)   + ' L/dia';
+  valDomestico.textContent = formatarNumero(dados.domestico) + ' L/dia';
+  valEconomia.textContent  = formatarNumero(dados.economia)  + ' L/dia';
+
+  suggestionsList.innerHTML = gerarSugestoes(dados).map(s =>
+    `<li><span class="sug-icon" aria-hidden="true">${s.icon}</span>${s.texto}</li>`
+  ).join('');
+
+  const fortes = gerarPontosFortes();
+  const strengthsBox = document.getElementById('strengths-box');
+  if (fortes.length > 0) {
+    strengthsBox.classList.remove('hidden');
+    strengthsList.innerHTML = fortes.map(f =>
+      `<li><span class="sug-icon">✅</span>${f}</li>`
+    ).join('');
+  } else {
+    strengthsBox.classList.add('hidden');
+  }
+
+  salvarResultado(dados, classif);
+  mostrarTela(telaResult);
+}
+
+/* =====================================================
+   DICAS
+   ===================================================== */
+function renderizarDicas() {
+  if (tipsGrid.children.length > 0) return;
+  tipsGrid.innerHTML = DICAS.map(d => `
+    <article class="tip-card">
+      <div class="tip-card__header">
+        <span class="tip-card__emoji" aria-hidden="true">${d.emoji}</span>
+        <h3 class="tip-card__title">${d.titulo}</h3>
+      </div>
+      <div class="tip-card__body">
+        <p>${d.texto}</p>
+        <p class="tip-card__stat">${d.stat}</p>
+      </div>
+    </article>
+  `).join('');
+}
+
+/* =====================================================
+   UTILITÁRIOS
+   ===================================================== */
+function formatarNumero(n) { return n.toLocaleString('pt-BR'); }
+
+function limparFormulario() {
+  [inputArea, inputBovinos, inputSuinos, inputAves, inputMoradores].forEach(i => i.value = '');
+  [selectIrrigacao, selectConsumo].forEach(s => s.value = '');
+  [checkReusoAgua, checkGotejamento, checkReusoAnimal, checkBiodigestor].forEach(c => c.checked = false);
+  document.querySelectorAll('.field-input, .field-select').forEach(c => c.classList.remove('filled'));
+  document.querySelectorAll('.form-card').forEach(c => c.classList.remove('has-data'));
+  progressFill.style.width = '0%';
+  progressLabel.textContent = '0% preenchido';
+}
+
+btnLimpar.addEventListener('click', limparFormulario);
+
+/* =====================================================
+   VALIDAÇÃO
+   ===================================================== */
+function validarFormulario() {
+  const ok =
+    (parseFloat(inputArea.value) > 0 && selectIrrigacao.value !== '') ||
+    parseInt(inputBovinos.value) > 0 || parseInt(inputSuinos.value) > 0 ||
+    parseInt(inputAves.value) > 0 ||
+    (parseInt(inputMoradores.value) > 0 && selectConsumo.value !== '');
+  if (!ok) {
+    alert('Preencha pelo menos um grupo de dados para calcular o consumo.');
+    return false;
+  }
+  return true;
+}
+btnCalcular.addEventListener('click', () => { if (validarFormulario()) mostrarResultado(); });
+
+/* =====================================================
+   LOCAL STORAGE
+   ===================================================== */
+function salvarResultado(dados, classif) {
+  localStorage.setItem('aquaagro-ultimo-resultado', JSON.stringify({
+    data: new Date().toLocaleDateString('pt-BR'),
+    total: dados.total, economia: dados.economia,
+    classificacao: classif.rotulo
+  }));
+}
+
+(function verificarSalvo() {
+  const s = localStorage.getItem('aquaagro-ultimo-resultado');
+  if (!s) return;
+  try {
+    const r = JSON.parse(s);
+    const banner = document.getElementById('last-result-banner');
+    banner.innerHTML = `<span class="lrb-icon">📊</span><span>Última análise em <strong>${r.data}</strong>: <strong>${formatarNumero(r.total)} L/dia</strong> · ${r.classificacao}</span>`;
+    banner.classList.remove('hidden');
+  } catch (_) { localStorage.removeItem('aquaagro-ultimo-resultado'); }
+})();
+
+/* =====================================================
+   INICIALIZAÇÃO
+   ===================================================== */
+mostrarTela(telaHome);
+</script>
 </body>
 </html>
