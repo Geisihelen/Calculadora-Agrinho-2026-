@@ -353,71 +353,96 @@ input, select { font-family: inherit; }
 }
 .drop-scene {
   position: relative;
-  width: 240px;
-  height: 320px;
+  width: 260px;
+  height: 340px;
 }
+
+/* Bolha de fundo */
 .drop-circle-bg {
   position: absolute;
-  inset: 0;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(1.05);
+  width: 220px; height: 280px;
   border-radius: 50%;
   background: radial-gradient(circle at 40% 35%, var(--accent-lt) 0%, var(--surface-2) 70%, transparent 100%);
-  transform: scale(1.1);
   animation: pulse-bg 4s ease-in-out infinite;
+  z-index: 0;
 }
 @keyframes pulse-bg {
-  0%, 100% { transform: scale(1.05); opacity: .7; }
-  50% { transform: scale(1.18); opacity: 1; }
+  0%, 100% { transform: translate(-50%,-50%) scale(1.02); opacity: .75; }
+  50%       { transform: translate(-50%,-50%) scale(1.12); opacity: 1; }
 }
+
+/* Gotas caindo */
 .drop {
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
   border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-  animation: fall 2.4s ease-in infinite;
   opacity: 0;
-  filter: blur(.3px);
+  z-index: 1;
 }
-.drop--1 { width: 20px; height: 28px; background: linear-gradient(160deg,#00e5d1,#00c4b0); top: 0; animation-delay: 0s; box-shadow: 0 0 10px rgba(0,196,176,.5); }
-.drop--2 { width: 14px; height: 20px; background: linear-gradient(160deg,#29a07c,#1a7a5e); top: 0; left: 55%; animation-delay: .85s; }
-.drop--3 { width: 11px; height: 16px; background: linear-gradient(160deg,#3ba0ef,#1e6fbf); top: 0; left: 38%; animation-delay: 1.55s; }
-@keyframes fall {
-  0%   { top: 20px; opacity: 0; }
-  12%  { opacity: 1; }
-  82%  { opacity: 1; }
-  100% { top: 240px; opacity: 0; }
+.drop--1 {
+  width: 20px; height: 28px;
+  left: calc(50% - 10px);
+  background: linear-gradient(160deg,#00e5d1,#00c4b0);
+  box-shadow: 0 0 10px rgba(0,196,176,.5);
+  animation: fall1 2.4s ease-in infinite 0s;
 }
+.drop--2 {
+  width: 14px; height: 20px;
+  left: calc(58% - 7px);
+  background: linear-gradient(160deg,#29a07c,#1a7a5e);
+  animation: fall1 2.4s ease-in infinite .85s;
+}
+.drop--3 {
+  width: 11px; height: 16px;
+  left: calc(40% - 5px);
+  background: linear-gradient(160deg,#3ba0ef,#1e6fbf);
+  animation: fall1 2.4s ease-in infinite 1.55s;
+}
+@keyframes fall1 {
+  0%   { top: 30px;  opacity: 0; }
+  10%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { top: 260px; opacity: 0; }
+}
+
+/* Ondas */
 .ripple {
   position: absolute;
-  bottom: 30px;
+  bottom: 28px;
   left: 50%;
   transform: translateX(-50%);
-  width: 20px; height: 14px;
+  width: 20px; height: 12px;
   border-radius: 50%;
   border: 2.5px solid var(--accent);
-  animation: ripple 2.4s ease-out infinite;
   opacity: 0;
+  z-index: 1;
+  animation: ripple-anim 2.4s ease-out infinite 0s;
 }
 .ripple-2 {
   border-color: var(--primary-lt);
-  animation-delay: .3s;
+  animation: ripple-anim 2.4s ease-out infinite .35s;
 }
-@keyframes ripple {
+@keyframes ripple-anim {
   0%   { opacity: 0; width: 20px; }
-  30%  { opacity: .75; }
-  100% { opacity: 0; width: 130px; }
+  25%  { opacity: .75; }
+  100% { opacity: 0; width: 120px; }
 }
-.hero-icon-float {
+
+/* Ícones flutuantes — classes explícitas */
+.float-icon {
   position: absolute;
-  font-size: 2.2rem;
-  animation: float 5s ease-in-out infinite;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,.12));
+  font-size: 2rem;
+  z-index: 2;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,.13));
+  animation: float-anim 5s ease-in-out infinite;
 }
-.hero-icon-float:nth-child(1) { top: 18%; right: 5%; animation-delay: 0s; }
-.hero-icon-float:nth-child(2) { top: 55%; right: -10%; animation-delay: 1.2s; font-size: 1.8rem; }
-.hero-icon-float:nth-child(3) { bottom: 15%; left: 0%; animation-delay: 2.3s; font-size: 1.6rem; }
-@keyframes float {
+.float-icon--plant { top: 12%;  right: 4%;  animation-delay: 0s;   font-size: 1.9rem; }
+.float-icon--sun   { bottom: 18%; left: 2%;  animation-delay: 1.3s; font-size: 1.7rem; }
+.float-icon--cow   { top: 22%;  left: 4%;   animation-delay: 2.4s; font-size: 2rem; }
+@keyframes float-anim {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-12px); }
+  50%       { transform: translateY(-10px); }
 }
 
 /* Histórico da última análise */
@@ -904,14 +929,14 @@ input, select { font-family: inherit; }
     <div class="hero__visual" aria-hidden="true">
       <div class="drop-scene">
         <div class="drop-circle-bg"></div>
-        <span class="hero-icon-float">🌱</span>
-        <span class="hero-icon-float">☀️</span>
-        <span class="hero-icon-float">🐄</span>
         <div class="drop drop--1"></div>
         <div class="drop drop--2"></div>
         <div class="drop drop--3"></div>
         <div class="ripple"></div>
         <div class="ripple ripple-2"></div>
+        <span class="float-icon float-icon--plant">🌱</span>
+        <span class="float-icon float-icon--sun">☀️</span>
+        <span class="float-icon float-icon--cow">🐄</span>
       </div>
     </div>
   </div>
